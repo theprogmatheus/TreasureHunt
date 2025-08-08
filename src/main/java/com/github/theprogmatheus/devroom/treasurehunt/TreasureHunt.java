@@ -9,7 +9,7 @@ public class TreasureHunt extends JavaPlugin {
 
     @Override
     public void onLoad() {
-        this.databaseManager = new DatabaseManager("localhost", "minecraft", "root", "root");
+        this.databaseManager = new DatabaseManager("localhost", "minecraft", "root", "root", "treasure_hunt_");
     }
 
     @Override
