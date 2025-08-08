@@ -1,0 +1,7 @@
+name: "TreasureHunt"
+main: "com.github.theprogmatheus.devroom.treasurehunt.TreasureHunt"
+version: "1.0"
+author: "Sr_Edition"
+commands:
+  treasure:
+    description: "Run the treasure command for more info."
