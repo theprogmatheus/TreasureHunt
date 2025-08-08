@@ -1,5 +1,6 @@
 name: "TreasureHunt"
 main: "com.github.theprogmatheus.devroom.treasurehunt.TreasureHunt"
+api-version: "1.20"
 version: "1.0"
 author: "Sr_Edition"
 commands:

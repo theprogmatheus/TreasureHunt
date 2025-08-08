@@ -1,5 +1,6 @@
 plugins {
     id("java")
+    id("com.gradleup.shadow") version "8.3.0"
 }
 
 group = "com.github.theprogmatheus"
@@ -21,4 +22,8 @@ dependencies {
 
 tasks.test {
     useJUnitPlatform()
+}
+
+tasks.shadowJar {
+    relocate("com.zaxxer.hikari", "com.github.theprogmatheus.devroom.treasurehunt.lib.hikari")
 }
