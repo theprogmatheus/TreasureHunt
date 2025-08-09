@@ -17,6 +17,27 @@ public class TreasureRepository {
         this.databaseManager = databaseManager;
     }
 
+    public boolean initTables() {
+        List<String> sqlQueries = this.databaseManager.getSqlQueryLoader().getQueries("create_tables");
+
+        try (Connection connection = this.databaseManager.getDataSource().getConnection();
+             Statement statement = connection.createStatement()) {
+
+            for (String sqlQuery : sqlQueries) {
+                try {
+                    statement.executeUpdate(sqlQuery);
+                } catch (SQLException sqlException) {
+                    sqlException.printStackTrace();
+                }
+            }
+
+            return true;
+        } catch (Exception exception) {
+            exception.printStackTrace();
+            return false;
+        }
+    }
+
     public boolean createTreasure(String treasureId, String world, int x, int y, int z, String command) {
         String sqlQuery = this.databaseManager.getSqlQueryLoader().getQuery("insert_treasure");
         try (Connection connection = this.databaseManager.getDataSource().getConnection();

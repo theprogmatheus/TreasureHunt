@@ -5,12 +5,9 @@ CREATE TABLE IF NOT EXISTS %table_prefix%treasures (
     y INT NOT NULL,
     z INT NOT NULL,
     command TEXT NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE KEY idx_treasure_position (world, x, y, z)
 ) ENGINE=InnoDB;
-
-
-CREATE UNIQUE INDEX idx_treasure_position
-ON %table_prefix%treasures(world, x, y, z);
 
 CREATE TABLE IF NOT EXISTS %table_prefix%treasure_claims (
     treasure_id VARCHAR(64) NOT NULL,
@@ -19,8 +16,6 @@ CREATE TABLE IF NOT EXISTS %table_prefix%treasure_claims (
     PRIMARY KEY (treasure_id, player_uuid),
     CONSTRAINT fk_treasure FOREIGN KEY (treasure_id)
         REFERENCES %table_prefix%treasures(id)
-        ON DELETE CASCADE
+        ON DELETE CASCADE,
+    KEY idx_claim_treasure (treasure_id)
 ) ENGINE=InnoDB;
-
-CREATE INDEX idx_claim_treasure
-ON treasure_claims(treasure_id);

@@ -3,9 +3,8 @@ package com.github.theprogmatheus.devroom.treasurehunt.database;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Scanner;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class SqlQueryLoader {
 
@@ -17,6 +16,15 @@ public class SqlQueryLoader {
         this.cachedQueries = new HashMap<>();
     }
 
+    public List<String> getQueries(String queryPath) {
+        String query = getQuery(queryPath);
+        if (query != null)
+            return Arrays.stream(query.split(";"))
+                    .map(String::trim)
+                    .filter(str -> !str.isEmpty())
+                    .collect(Collectors.toList());
+        return List.of();
+    }
 
     public String getQuery(String queryPath) {
         return this.cachedQueries
