@@ -34,16 +34,16 @@ public class TreasureCommand extends AbstractCommand {
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
         if (args.length > 0) {
             AbstractCommand subCommand = this.subCommands.get(args[0].toLowerCase());
-            if (subCommand != null)
-                return subCommand.onCommand(sender, command, label, Arrays.copyOfRange(args, 1, args.length));
-
+            if (subCommand != null) {
+                subCommand.onCommand(sender, command, label, Arrays.copyOfRange(args, 1, args.length));
+                return true;
+            }
         }
 
         for (AbstractCommand subCommand : this.subCommands.values()) {
             sender.sendMessage("§a/%s %s §8- §7%s".formatted(this.name, subCommand.usage, subCommand.description));
         }
-
-        return false;
+        return true;
     }
 
     @Nullable
