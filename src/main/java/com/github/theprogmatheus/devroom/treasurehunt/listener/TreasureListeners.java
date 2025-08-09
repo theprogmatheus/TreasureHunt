@@ -1,18 +1,17 @@
 package com.github.theprogmatheus.devroom.treasurehunt.listener;
 
-import com.github.theprogmatheus.devroom.treasurehunt.TreasureHunt;
 import com.github.theprogmatheus.devroom.treasurehunt.command.subcmd.CreateCommand;
 import com.github.theprogmatheus.devroom.treasurehunt.database.entity.TreasureEntity;
-import com.github.theprogmatheus.devroom.treasurehunt.database.repository.TreasureRepository;
-import org.bukkit.Bukkit;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
+
+import static com.github.theprogmatheus.devroom.treasurehunt.TreasureManager.*;
 
 public class TreasureListeners implements Listener {
-
 
     @EventHandler
     public void onClickBlock(PlayerInteractEvent event) {
@@ -22,39 +21,25 @@ public class TreasureListeners implements Listener {
 
         Player player = event.getPlayer();
 
-        String world = block.getWorld().getName();
-        int x = block.getX();
-        int y = block.getY();
-        int z = block.getZ();
-
-        TreasureRepository repo = TreasureHunt.getInstance().getTreasureRepository();
-
-        TreasureEntity treasure = CreateCommand.creatingTreasures.get(player);
-        if (treasure != null) {
+        if (CreateCommand.creatingTreasures.containsKey(player)) {
             event.setCancelled(true);
-            if (repo.createTreasure(treasure.getId(), world, x, y, z, treasure.getCommand())) {
-                player.sendMessage("§aTreasure created successfully.");
-            } else {
-                player.sendMessage("§cAn error occurred while trying to create the treasure. Please try again.");
-            }
-            CreateCommand.creatingTreasures.remove(player);
-        } else {
-            treasure = repo.getTreasureByPosition(world, x, y, z);
-            if (treasure == null)
-                return;
 
+            TreasureEntity placeholder = CreateCommand.creatingTreasures.get(player);
+
+            placeholder.setWorld(block.getWorld().getName());
+            placeholder.setX(block.getX());
+            placeholder.setY(block.getY());
+            placeholder.setZ(block.getZ());
+
+            runTask(player, () -> createTreasure(player, placeholder));
+        } else if (isTreasure(block)) {
             event.setCancelled(true);
-            if (!repo.hasClaimed(treasure.getId(), player.getUniqueId())) {
-                if (repo.claim(treasure.getId(), player.getUniqueId())) {
-                    player.sendMessage("§aCongratulations, you found the treasure :)");
-                    Bukkit.dispatchCommand(Bukkit.getConsoleSender(), treasure.getCommand().replace("%player%", player.getName()));
-                } else
-                    player.sendMessage("§cAn error occurred while trying to claim the treasure.");
-            } else {
-                player.sendMessage("§eYou've already found the treasure, congratulations :)");
-            }
+            runTask(player, () -> claimTreasure(player, block));
         }
     }
 
-
+    @EventHandler
+    public void onPlayerQuit(PlayerQuitEvent event) {
+        CreateCommand.creatingTreasures.remove(event.getPlayer());
+    }
 }

@@ -1,6 +1,6 @@
 package com.github.theprogmatheus.devroom.treasurehunt.command.subcmd;
 
-import com.github.theprogmatheus.devroom.treasurehunt.TreasureHunt;
+import com.github.theprogmatheus.devroom.treasurehunt.TreasureManager;
 import com.github.theprogmatheus.devroom.treasurehunt.command.AbstractCommand;
 import com.github.theprogmatheus.devroom.treasurehunt.database.entity.TreasureEntity;
 import org.bukkit.command.Command;
@@ -10,6 +10,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 
 public class CreateCommand extends AbstractCommand {
 
@@ -28,12 +29,6 @@ public class CreateCommand extends AbstractCommand {
 
         if (args.length >= 2) {
             String treasureId = args[0];
-
-            if (TreasureHunt.getInstance().getTreasureRepository().existsTreasure(treasureId)) {
-                player.sendMessage("§cThere is already a treasure registered with this same ID.");
-                return true;
-            }
-
             StringBuilder treasureCommand = new StringBuilder();
             for (int i = 1; i < args.length; i++) {
                 if (i != 1)
@@ -41,8 +36,21 @@ public class CreateCommand extends AbstractCommand {
                 treasureCommand.append(args[i]);
             }
 
-            creatingTreasures.put(player, new TreasureEntity(treasureId, null, 0, 0, 0, treasureCommand.toString(), 0));
-            player.sendMessage("§eThe treasure creation has started, now you need to click on the block that will be the treasure to finish the creation.");
+            player.sendMessage("§eStarting treasure creation, please wait...");
+            CompletableFuture.supplyAsync(() -> TreasureManager.treasureRepository.existsTreasure(treasureId))
+                    .thenAccept(existsTreasure -> {
+                        if (existsTreasure) {
+                            player.sendMessage("§cThere is already a treasure registered with this same ID.");
+                        } else {
+                            creatingTreasures.put(player, new TreasureEntity(treasureId, null, 0, 0, 0, treasureCommand.toString(), 0));
+                            player.sendMessage("§aThe treasure creation has started, now you need to click on the block that will be the treasure to finish the creation.");
+                        }
+                    }).exceptionally(ex -> {
+                        player.sendMessage("§cUnexpected error: " + (ex.getMessage() != null ? ex.getMessage() : ex.getClass().getSimpleName()));
+                        player.sendMessage("§cSee more details in the console stacktrace.");
+                        ex.printStackTrace();
+                        return null;
+                    });
         } else
             sender.sendMessage("§cUsage: %s".formatted(this.usage));
         return true;

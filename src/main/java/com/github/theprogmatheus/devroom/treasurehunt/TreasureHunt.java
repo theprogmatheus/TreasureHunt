@@ -2,8 +2,6 @@ package com.github.theprogmatheus.devroom.treasurehunt;
 
 import com.github.theprogmatheus.devroom.treasurehunt.command.AbstractCommand;
 import com.github.theprogmatheus.devroom.treasurehunt.command.TreasureCommand;
-import com.github.theprogmatheus.devroom.treasurehunt.database.DatabaseManager;
-import com.github.theprogmatheus.devroom.treasurehunt.database.repository.TreasureRepository;
 import com.github.theprogmatheus.devroom.treasurehunt.listener.TreasureListeners;
 import org.bukkit.Bukkit;
 import org.bukkit.command.PluginCommand;
@@ -13,26 +11,14 @@ public class TreasureHunt extends JavaPlugin {
 
     private static TreasureHunt instance;
 
-    private DatabaseManager databaseManager;
-    private TreasureRepository treasureRepository;
-
     @Override
     public void onLoad() {
         instance = this;
-        this.databaseManager = new DatabaseManager(
-                "localhost",
-                "minecraft",
-                "root",
-                "root",
-                "treasure_hunt_"
-        );
     }
 
     @Override
     public void onEnable() {
-        this.databaseManager.init();
-        this.treasureRepository = new TreasureRepository(this.databaseManager);
-        this.treasureRepository.initTables();
+        TreasureManager.init();
         this.registerCommand(new TreasureCommand());
         Bukkit.getPluginManager().registerEvents(new TreasureListeners(), this);
     }
@@ -40,19 +26,11 @@ public class TreasureHunt extends JavaPlugin {
 
     @Override
     public void onDisable() {
-        this.databaseManager.terminate();
+        TreasureManager.terminate();
     }
 
     public static TreasureHunt getInstance() {
         return instance;
-    }
-
-    public DatabaseManager getDatabaseManager() {
-        return databaseManager;
-    }
-
-    public TreasureRepository getTreasureRepository() {
-        return treasureRepository;
     }
 
     private void registerCommand(AbstractCommand command) {
