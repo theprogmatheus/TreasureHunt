@@ -4,7 +4,7 @@ import com.github.theprogmatheus.devroom.treasurehunt.command.AbstractCommand;
 import com.github.theprogmatheus.devroom.treasurehunt.command.TreasureCommand;
 import com.github.theprogmatheus.devroom.treasurehunt.database.DatabaseManager;
 import com.github.theprogmatheus.devroom.treasurehunt.database.repository.TreasureRepository;
-import com.github.theprogmatheus.devroom.treasurehunt.listener.CreateTreasureListener;
+import com.github.theprogmatheus.devroom.treasurehunt.listener.TreasureListeners;
 import org.bukkit.Bukkit;
 import org.bukkit.command.PluginCommand;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -34,7 +34,7 @@ public class TreasureHunt extends JavaPlugin {
         this.treasureRepository = new TreasureRepository(this.databaseManager);
         this.treasureRepository.initTables();
         this.registerCommand(new TreasureCommand());
-        Bukkit.getPluginManager().registerEvents(new CreateTreasureListener(), this);
+        Bukkit.getPluginManager().registerEvents(new TreasureListeners(), this);
     }
 
 
