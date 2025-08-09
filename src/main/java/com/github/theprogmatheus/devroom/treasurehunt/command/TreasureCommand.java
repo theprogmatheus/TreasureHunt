@@ -9,6 +9,7 @@ import org.bukkit.command.CommandSender;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -34,7 +35,8 @@ public class TreasureCommand extends AbstractCommand {
         if (args.length > 0) {
             AbstractCommand subCommand = this.subCommands.get(args[0].toLowerCase());
             if (subCommand != null)
-                return subCommand.onCommand(sender, command, label, args);
+                return subCommand.onCommand(sender, command, label, Arrays.copyOfRange(args, 1, args.length));
+
         }
 
         for (AbstractCommand subCommand : this.subCommands.values()) {
@@ -58,7 +60,7 @@ public class TreasureCommand extends AbstractCommand {
 
             AbstractCommand subCommand = this.subCommands.get(args[0].toLowerCase());
             if (subCommand != null)
-                return subCommand.onTabComplete(sender, command, label, args);
+                return subCommand.onTabComplete(sender, command, label, Arrays.copyOfRange(args, 1, args.length));
         }
         return List.of();
     }

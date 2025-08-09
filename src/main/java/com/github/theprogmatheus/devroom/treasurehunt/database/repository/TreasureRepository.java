@@ -58,6 +58,21 @@ public class TreasureRepository {
         }
     }
 
+    public boolean existsTreasure(String treasureId) {
+        String sqlQuery = this.databaseManager.getSqlQueryLoader().getQuery("exists_treasure");
+        try (Connection connection = this.databaseManager.getDataSource().getConnection();
+             PreparedStatement statement = connection.prepareStatement(sqlQuery)) {
+
+            statement.setString(1, treasureId);
+            try (ResultSet rs = statement.executeQuery()) {
+                return rs.next();
+            }
+        } catch (Exception exception) {
+            exception.printStackTrace();
+            return false;
+        }
+    }
+
     public boolean deleteTreasure(String treasureId) {
         String sqlQuery = this.databaseManager.getSqlQueryLoader().getQuery("delete_treasure");
         try (Connection connection = this.databaseManager.getDataSource().getConnection();
