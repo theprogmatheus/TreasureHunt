@@ -24,21 +24,26 @@ public class TreasureManager {
     public static DatabaseManager databaseManager;
     public static TreasureRepository treasureRepository;
 
-    public static void init() {
+    public static boolean init() {
         File configFile = new File(TreasureHunt.getInstance().getDataFolder(), "config.yml");
-        if (!configFile.exists())
+        if (!configFile.exists()) {
             TreasureHunt.getInstance().saveResource("config.yml", false);
+            TreasureHunt.getInstance().getLogger().warning("Config newly created, you need to configure mysql in \"config.yml\" configuration file to use your plugin for the first time.");
+            return false;
+        }
 
         FileConfiguration config = TreasureHunt.getInstance().getConfig();
-
         databaseManager = new DatabaseManager(
+                config.getBoolean("mysql.debug"),
                 config.getString("mysql.hostname"),
                 config.getString("mysql.database"),
                 config.getString("mysql.username"),
                 config.getString("mysql.password"),
                 config.getString("mysql.table_prefix")
         );
-        databaseManager.init();
+        if (!databaseManager.init())
+            return false;
+
         treasureRepository = new TreasureRepository(databaseManager);
         treasureRepository.initTables();
 
@@ -47,10 +52,13 @@ public class TreasureManager {
             if (world == null) return;
             treasures.put(world.getBlockAt(treasure.getX(), treasure.getY(), treasure.getZ()), treasure);
         });
+
+        return true;
     }
 
     public static void terminate() {
-        databaseManager.terminate();
+        if (databaseManager != null)
+            databaseManager.terminate();
     }
 
     public static boolean isTreasure(Block block) {

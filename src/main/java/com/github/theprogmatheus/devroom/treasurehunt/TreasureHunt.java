@@ -19,10 +19,12 @@ public class TreasureHunt extends JavaPlugin {
 
     @Override
     public void onEnable() {
-        TreasureManager.init();
-        Menu.init(this);
-        this.registerCommand(new TreasureCommand());
-        Bukkit.getPluginManager().registerEvents(new TreasureListeners(), this);
+        if (TreasureManager.init()) {
+            Menu.init(this);
+            this.registerCommand(new TreasureCommand());
+            Bukkit.getPluginManager().registerEvents(new TreasureListeners(), this);
+        } else
+            setEnabled(false);
     }
 
 

@@ -3,10 +3,10 @@ package com.github.theprogmatheus.devroom.treasurehunt.database;
 import com.github.theprogmatheus.devroom.treasurehunt.TreasureHunt;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
-import org.bukkit.Bukkit;
 
 public class DatabaseManager {
 
+    private final boolean debug;
     private final String hostname;
     private final String database;
     private final String username;
@@ -16,7 +16,8 @@ public class DatabaseManager {
 
     private HikariDataSource dataSource;
 
-    public DatabaseManager(String hostname, String database, String username, String password, String tablePrefix) {
+    public DatabaseManager(boolean debug, String hostname, String database, String username, String password, String tablePrefix) {
+        this.debug = debug;
         this.hostname = hostname;
         this.database = database;
         this.username = username;
@@ -25,12 +26,15 @@ public class DatabaseManager {
     }
 
 
-    public void init() {
+    public boolean init() {
         try {
             this.dataSource = new HikariDataSource(buildHikariConfig());
+            return true;
         } catch (Exception exception) {
-            exception.printStackTrace();
-            Bukkit.getPluginManager().disablePlugin(TreasureHunt.getInstance());
+            TreasureHunt.getInstance().getLogger().warning("Unable to start a database connection, check your MySQL settings in the \"config.yml\" file.");
+            if (debug)
+                exception.printStackTrace();
+            return false;
         }
     }
 
@@ -38,7 +42,8 @@ public class DatabaseManager {
         try {
             this.dataSource.close();
         } catch (Exception exception) {
-            exception.printStackTrace();
+            if (debug)
+                exception.printStackTrace();
         }
     }
 
