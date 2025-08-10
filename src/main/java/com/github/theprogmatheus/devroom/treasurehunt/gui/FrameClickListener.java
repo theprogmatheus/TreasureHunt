@@ -1,10 +1,11 @@
 package com.github.theprogmatheus.devroom.treasurehunt.gui;
 
+import org.bukkit.Material;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.inventory.InventoryHolder;
+import org.bukkit.inventory.ItemStack;
 
 import java.util.Map;
 import java.util.function.Consumer;
@@ -18,36 +19,35 @@ public class FrameClickListener implements Listener {
             return;
 
         InventoryHolder holder = event.getInventory().getHolder();
-        if (!(holder instanceof Frame frame))
+        if (!(holder instanceof InventoryFrame frame))
             return;
 
         event.setCancelled(true);
+
+        ItemStack clickedItem = event.getCurrentItem();
+        if (clickedItem == null || clickedItem.getType() == Material.AIR)
+            return;
         if (event.getView().getTopInventory() == event.getClickedInventory()) {
+            Menu menu = frame.getMenu();
+
             int slot = event.getSlot();
 
-            Map.Entry<Button, Predicate<Frame>> entry = frame.getButtons().get(slot);
-            if (entry != null && entry.getValue().test(frame)) {
+            Map.Entry<Button, Predicate<InventoryFrame>> entry = menu.getButtons().get(slot);
+            if (entry != null) {
                 handleButtonClick(entry.getKey(), event);
                 return;
             }
 
-            if (frame instanceof PagedFrame pagedFrame) {
-                Button button = pagedFrame.getButtonAt(event.getWhoClicked().getUniqueId(), slot);
+            if (menu instanceof PagedMenu) {
+                Map<Integer, Button> pageButtons = (Map<Integer, Button>) frame.getProperties().get("page_buttons");
+
+                Button button = pageButtons.get(slot);
                 if (button != null) {
                     handleButtonClick(button, event);
                 }
             }
         }
     }
-
-    @EventHandler
-    public void onInventoryClose(InventoryCloseEvent event) {
-        InventoryHolder holder = event.getInventory().getHolder();
-        if (holder instanceof PagedFrame pagedFrame) {
-            pagedFrame.clearCache(event.getPlayer().getUniqueId());
-        }
-    }
-
 
     private void handleButtonClick(Button button, InventoryClickEvent event) {
         Consumer<InventoryClickEvent> consumer = button.getConsumers().get(event.getClick());

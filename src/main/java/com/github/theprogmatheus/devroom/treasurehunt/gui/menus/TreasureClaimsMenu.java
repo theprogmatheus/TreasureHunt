@@ -2,7 +2,7 @@ package com.github.theprogmatheus.devroom.treasurehunt.gui.menus;
 
 import com.github.theprogmatheus.devroom.treasurehunt.database.entity.TreasureClaimEntity;
 import com.github.theprogmatheus.devroom.treasurehunt.gui.Button;
-import com.github.theprogmatheus.devroom.treasurehunt.gui.PagedFrame;
+import com.github.theprogmatheus.devroom.treasurehunt.gui.PagedMenu;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
@@ -25,8 +25,8 @@ public class TreasureClaimsMenu {
         this.claims = claims;
     }
 
-    public PagedFrame build(Player viewer) {
-        PagedFrame frame = new PagedFrame("Claims for " + treasure, 6);
+    public PagedMenu build(Player viewer) {
+        PagedMenu frame = new PagedMenu("Claims for " + treasure + " #%page%", 6);
 
         for (TreasureClaimEntity claim : claims) {
             OfflinePlayer player = Bukkit.getOfflinePlayer(claim.getPlayerId());

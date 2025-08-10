@@ -4,7 +4,7 @@ import com.github.theprogmatheus.devroom.treasurehunt.TreasureHunt;
 import com.github.theprogmatheus.devroom.treasurehunt.TreasureManager;
 import com.github.theprogmatheus.devroom.treasurehunt.database.entity.TreasureEntity;
 import com.github.theprogmatheus.devroom.treasurehunt.gui.Button;
-import com.github.theprogmatheus.devroom.treasurehunt.gui.PagedFrame;
+import com.github.theprogmatheus.devroom.treasurehunt.gui.PagedMenu;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -26,8 +26,8 @@ public class TreasureListMenu {
         this.treasures = TreasureManager.treasures.values().stream().toList();
     }
 
-    public PagedFrame build(Player viewer) {
-        PagedFrame frame = new PagedFrame("Treasures", 6);
+    public PagedMenu build(Player viewer) {
+        PagedMenu frame = new PagedMenu("Treasures #%page%", 6);
 
         for (TreasureEntity treasure : treasures) {
             ItemStack item = new ItemStack(Material.CHEST);

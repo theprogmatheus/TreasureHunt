@@ -12,28 +12,30 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Predicate;
 
-public class Frame implements InventoryHolder {
+public class Menu implements InventoryHolder {
 
     private final String title;
     private final int rows;
-    private final Map<Integer, Map.Entry<Button, Predicate<Frame>>> buttons;
+    private final Map<Integer, Map.Entry<Button, Predicate<InventoryFrame>>> buttons;
 
-    public Frame(String title, int rows) {
+    public Menu(String title, int rows) {
         this.title = title;
         this.rows = rows;
         this.buttons = new HashMap<>();
     }
 
     public void show(Player player) {
-        Inventory inventory = Bukkit.createInventory(this, this.rows * 9, this.title);
+        InventoryFrame inventory = new InventoryFrame(this, this.title, this.rows);
+
         applyButtons(inventory);
-        player.openInventory(inventory);
+
+        inventory.open(player);
     }
 
-    protected void applyButtons(Inventory inventory) {
+    protected void applyButtons(InventoryFrame inventory) {
         for (var entry : buttons.entrySet()) {
-            if (entry.getValue().getValue().test(this)) {
-                inventory.setItem(entry.getKey(), entry.getValue().getKey().getItemStack());
+            if (entry.getValue().getValue().test(inventory)) {
+                inventory.getInventory().setItem(entry.getKey(), entry.getValue().getKey().getItemStack());
             }
         }
     }
@@ -42,7 +44,7 @@ public class Frame implements InventoryHolder {
         this.put(slot, button, frame -> true);
     }
 
-    public void put(int slot, Button button, Predicate<Frame> show) {
+    public void put(int slot, Button button, Predicate<InventoryFrame> show) {
         this.buttons.put(slot, new AbstractMap.SimpleEntry<>(button, show));
     }
 
@@ -54,7 +56,7 @@ public class Frame implements InventoryHolder {
         return rows;
     }
 
-    public Map<Integer, Map.Entry<Button, Predicate<Frame>>> getButtons() {
+    public Map<Integer, Map.Entry<Button, Predicate<InventoryFrame>>> getButtons() {
         return buttons;
     }
 

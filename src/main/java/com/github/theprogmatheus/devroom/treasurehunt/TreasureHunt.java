@@ -2,7 +2,7 @@ package com.github.theprogmatheus.devroom.treasurehunt;
 
 import com.github.theprogmatheus.devroom.treasurehunt.command.AbstractCommand;
 import com.github.theprogmatheus.devroom.treasurehunt.command.TreasureCommand;
-import com.github.theprogmatheus.devroom.treasurehunt.gui.Frame;
+import com.github.theprogmatheus.devroom.treasurehunt.gui.Menu;
 import com.github.theprogmatheus.devroom.treasurehunt.listener.TreasureListeners;
 import org.bukkit.Bukkit;
 import org.bukkit.command.PluginCommand;
@@ -20,7 +20,7 @@ public class TreasureHunt extends JavaPlugin {
     @Override
     public void onEnable() {
         TreasureManager.init();
-        Frame.init(this);
+        Menu.init(this);
         this.registerCommand(new TreasureCommand());
         Bukkit.getPluginManager().registerEvents(new TreasureListeners(), this);
     }
