@@ -2,12 +2,16 @@ package com.github.theprogmatheus.devroom.treasurehunt.command.subcmd;
 
 import com.github.theprogmatheus.devroom.treasurehunt.TreasureManager;
 import com.github.theprogmatheus.devroom.treasurehunt.command.AbstractCommand;
+import com.github.theprogmatheus.devroom.treasurehunt.database.entity.TreasureEntity;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 
 public class DeleteCommand extends AbstractCommand {
 
@@ -46,5 +50,18 @@ public class DeleteCommand extends AbstractCommand {
         } else
             sender.sendMessage("§cUsage: %s".formatted(this.usage));
         return true;
+    }
+
+    @Nullable
+    @Override
+    public List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
+        if (args.length == 1) {
+            return TreasureManager.treasures.values()
+                    .stream()
+                    .map(TreasureEntity::getId)
+                    .filter(id -> id.startsWith(args[0]))
+                    .collect(Collectors.toList());
+        }
+        return List.of();
     }
 }

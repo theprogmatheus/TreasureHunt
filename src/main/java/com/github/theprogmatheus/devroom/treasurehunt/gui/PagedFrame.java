@@ -20,8 +20,7 @@ public class PagedFrame extends Frame {
     }
 
     public void show(Player player, int page) {
-        int maxPages = getMaxPages();
-        if (page <= 0 || page > maxPages)
+        if (page <= 0)
             return;
 
         Inventory inventory = Bukkit.createInventory(
@@ -30,34 +29,37 @@ public class PagedFrame extends Frame {
                 getFormattedTitle(page)
         );
 
-        Map<Integer, Button> pageButtons = new HashMap<>();
+        if (!this.elements.isEmpty()) {
+            Map<Integer, Button> pageButtons = new HashMap<>();
 
-        int maxPerPage = getMaxElementPerPage();
-        int offset = (page - 1) * maxPerPage;
-        int length = offset + maxPerPage;
+            int maxPerPage = getMaxElementPerPage();
+            int offset = (page - 1) * maxPerPage;
+            int length = offset + maxPerPage;
 
-        int nextSlot = 0;
-        for (int i = offset; i < length; i++) {
-            if (i >= this.elements.size())
-                break;
+            int nextSlot = 0;
+            for (int i = offset; i < length; i++) {
+                if (i >= this.elements.size())
+                    break;
 
-            while (nextSlot < inventory.getSize()
-                    && this.reservedSlots.contains(nextSlot)) {
+                while (nextSlot < inventory.getSize()
+                        && this.reservedSlots.contains(nextSlot)) {
+                    nextSlot++;
+                }
+
+                if (nextSlot >= inventory.getSize())
+                    break;
+
+                Button element = this.elements.get(i);
+
+                inventory.setItem(nextSlot, element.getItemStack());
+                pageButtons.put(nextSlot, element);
                 nextSlot++;
             }
 
-            if (nextSlot >= inventory.getSize())
-                break;
-
-            Button element = this.elements.get(i);
-
-            inventory.setItem(nextSlot, element.getItemStack());
-            pageButtons.put(nextSlot, element);
-            nextSlot++;
+            this.pageButtonCache.put(player.getUniqueId(), pageButtons);
         }
 
         applyButtons(inventory);
-        this.pageButtonCache.put(player.getUniqueId(), pageButtons);
         player.openInventory(inventory);
     }
 
