@@ -8,8 +8,10 @@ import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.command.CommandSender;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 
+import java.io.File;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
@@ -23,12 +25,18 @@ public class TreasureManager {
     public static TreasureRepository treasureRepository;
 
     public static void init() {
+        File configFile = new File(TreasureHunt.getInstance().getDataFolder(), "config.yml");
+        if (!configFile.exists())
+            TreasureHunt.getInstance().saveResource("config.yml", false);
+
+        FileConfiguration config = TreasureHunt.getInstance().getConfig();
+
         databaseManager = new DatabaseManager(
-                "localhost",
-                "minecraft",
-                "root",
-                "root",
-                "treasure_hunt_"
+                config.getString("mysql.hostname"),
+                config.getString("mysql.database"),
+                config.getString("mysql.username"),
+                config.getString("mysql.password"),
+                config.getString("mysql.table_prefix")
         );
         databaseManager.init();
         treasureRepository = new TreasureRepository(databaseManager);

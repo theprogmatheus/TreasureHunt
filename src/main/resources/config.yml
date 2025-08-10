@@ -1,0 +1,6 @@
+mysql:
+  hostname: "localhost"
+  database: "minecraft"
+  username: "root"
+  password: ""
+  table_prefix: "treasure_hunt_"

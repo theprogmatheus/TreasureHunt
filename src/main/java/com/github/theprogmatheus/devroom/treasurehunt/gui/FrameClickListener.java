@@ -17,27 +17,25 @@ public class FrameClickListener implements Listener {
         if (event.getClickedInventory() == null)
             return;
 
-        if (event.getView().getTopInventory() != event.getClickedInventory())
-            return;
-
         InventoryHolder holder = event.getInventory().getHolder();
         if (!(holder instanceof Frame frame))
             return;
 
         event.setCancelled(true);
+        if (event.getView().getTopInventory() == event.getClickedInventory()) {
+            int slot = event.getSlot();
 
-        int slot = event.getSlot();
+            Map.Entry<Button, Predicate<Frame>> entry = frame.getButtons().get(slot);
+            if (entry != null && entry.getValue().test(frame)) {
+                handleButtonClick(entry.getKey(), event);
+                return;
+            }
 
-        Map.Entry<Button, Predicate<Frame>> entry = frame.getButtons().get(slot);
-        if (entry != null && entry.getValue().test(frame)) {
-            handleButtonClick(entry.getKey(), event);
-            return;
-        }
-
-        if (frame instanceof PagedFrame pagedFrame) {
-            Button button = pagedFrame.getButtonAt(event.getWhoClicked().getUniqueId(), slot);
-            if (button != null) {
-                handleButtonClick(button, event);
+            if (frame instanceof PagedFrame pagedFrame) {
+                Button button = pagedFrame.getButtonAt(event.getWhoClicked().getUniqueId(), slot);
+                if (button != null) {
+                    handleButtonClick(button, event);
+                }
             }
         }
     }

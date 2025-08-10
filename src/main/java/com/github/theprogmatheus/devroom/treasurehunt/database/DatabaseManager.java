@@ -1,7 +1,9 @@
 package com.github.theprogmatheus.devroom.treasurehunt.database;
 
+import com.github.theprogmatheus.devroom.treasurehunt.TreasureHunt;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
+import org.bukkit.Bukkit;
 
 public class DatabaseManager {
 
@@ -28,6 +30,7 @@ public class DatabaseManager {
             this.dataSource = new HikariDataSource(buildHikariConfig());
         } catch (Exception exception) {
             exception.printStackTrace();
+            Bukkit.getPluginManager().disablePlugin(TreasureHunt.getInstance());
         }
     }
 
