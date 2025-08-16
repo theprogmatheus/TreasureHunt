@@ -1,5 +1,6 @@
 package com.github.theprogmatheus.devroom.treasurehunt.command.subcmd;
 
+import com.github.theprogmatheus.devroom.treasurehunt.TreasureHunt;
 import com.github.theprogmatheus.devroom.treasurehunt.TreasureManager;
 import com.github.theprogmatheus.devroom.treasurehunt.command.AbstractCommand;
 import com.github.theprogmatheus.devroom.treasurehunt.database.entity.TreasureEntity;
@@ -8,16 +9,15 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
 public class CreateCommand extends AbstractCommand {
 
-    public static Map<Player, TreasureEntity> creatingTreasures = new HashMap<>();
+    private final TreasureManager manager;
 
     public CreateCommand() {
         super("create", "Create a new treasure.", "create <treasureId> <command>");
+        this.manager = TreasureHunt.getInstance().getTreasureManager();
     }
 
     @Override
@@ -37,12 +37,12 @@ public class CreateCommand extends AbstractCommand {
             }
 
             player.sendMessage("§eStarting treasure creation, please wait...");
-            CompletableFuture.supplyAsync(() -> TreasureManager.treasureRepository.existsTreasure(treasureId))
+            CompletableFuture.supplyAsync(() -> manager.getTreasureRepository().existsTreasure(treasureId))
                     .thenAccept(existsTreasure -> {
                         if (existsTreasure) {
                             player.sendMessage("§cThere is already a treasure registered with this same ID.");
                         } else {
-                            creatingTreasures.put(player, new TreasureEntity(treasureId, null, 0, 0, 0, treasureCommand.toString(), 0));
+                            manager.getCreatingTreasures().put(player, new TreasureEntity(treasureId, null, 0, 0, 0, treasureCommand.toString(), 0));
                             player.sendMessage("§aThe treasure creation has started, now you need to click on the block that will be the treasure to finish the creation.");
                         }
                     }).exceptionally(ex -> {

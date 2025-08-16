@@ -11,6 +11,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 public class TreasureHunt extends JavaPlugin {
 
     private static TreasureHunt instance;
+    private final TreasureManager treasureManager = new TreasureManager();
 
     @Override
     public void onLoad() {
@@ -19,7 +20,7 @@ public class TreasureHunt extends JavaPlugin {
 
     @Override
     public void onEnable() {
-        if (TreasureManager.init()) {
+        if (treasureManager.init()) {
             Menu.init(this);
             this.registerCommand(new TreasureCommand());
             Bukkit.getPluginManager().registerEvents(new TreasureListeners(), this);
@@ -30,11 +31,12 @@ public class TreasureHunt extends JavaPlugin {
 
     @Override
     public void onDisable() {
-        TreasureManager.terminate();
+        treasureManager.terminate();
     }
 
-    public static TreasureHunt getInstance() {
-        return instance;
+
+    public TreasureManager getTreasureManager() {
+        return treasureManager;
     }
 
     private void registerCommand(AbstractCommand command) {
@@ -48,4 +50,7 @@ public class TreasureHunt extends JavaPlugin {
         }
     }
 
+    public static TreasureHunt getInstance() {
+        return instance;
+    }
 }

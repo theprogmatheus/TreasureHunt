@@ -1,6 +1,5 @@
 package com.github.theprogmatheus.devroom.treasurehunt;
 
-import com.github.theprogmatheus.devroom.treasurehunt.command.subcmd.CreateCommand;
 import com.github.theprogmatheus.devroom.treasurehunt.database.DatabaseManager;
 import com.github.theprogmatheus.devroom.treasurehunt.database.entity.TreasureEntity;
 import com.github.theprogmatheus.devroom.treasurehunt.database.repository.TreasureRepository;
@@ -12,6 +11,7 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 
 import java.io.File;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
@@ -19,12 +19,15 @@ import java.util.function.Supplier;
 
 public class TreasureManager {
 
-    public static final Map<String, CompletableFuture<?>> tasksInProgress = new ConcurrentHashMap<>();
-    public static final Map<Block, TreasureEntity> treasures = new ConcurrentHashMap<>();
-    public static DatabaseManager databaseManager;
-    public static TreasureRepository treasureRepository;
 
-    public static boolean init() {
+    private final Map<String, CompletableFuture<?>> tasksInProgress = new ConcurrentHashMap<>();
+    private final Map<Player, TreasureEntity> creatingTreasures = new HashMap<>();
+
+    private final Map<Block, TreasureEntity> treasures = new ConcurrentHashMap<>();
+    private DatabaseManager databaseManager;
+    private TreasureRepository treasureRepository;
+
+    public boolean init() {
         File configFile = new File(TreasureHunt.getInstance().getDataFolder(), "config.yml");
         if (!configFile.exists()) {
             TreasureHunt.getInstance().saveResource("config.yml", false);
@@ -47,6 +50,7 @@ public class TreasureManager {
         treasureRepository = new TreasureRepository(databaseManager);
         treasureRepository.initTables();
 
+
         treasureRepository.getTreasures().forEach(treasure -> {
             World world = Bukkit.getWorld(treasure.getWorld());
             if (world == null) return;
@@ -56,16 +60,16 @@ public class TreasureManager {
         return true;
     }
 
-    public static void terminate() {
+    public void terminate() {
         if (databaseManager != null)
             databaseManager.terminate();
     }
 
-    public static boolean isTreasure(Block block) {
+    public boolean isTreasure(Block block) {
         return treasures.containsKey(block);
     }
 
-    public static void runTask(CommandSender sender, Supplier<CompletableFuture<Void>> taskSupplier) {
+    public void runTask(CommandSender sender, Supplier<CompletableFuture<Void>> taskSupplier) {
         String id = sender instanceof Player player ? player.getUniqueId().toString() : sender.getName();
         if (tasksInProgress.containsKey(id)) {
             sender.sendMessage("§cYou already have an action in progress. Please wait...");
@@ -79,7 +83,7 @@ public class TreasureManager {
     }
 
 
-    public static CompletableFuture<Void> claimTreasure(Player player, Block block) {
+    public CompletableFuture<Void> claimTreasure(Player player, Block block) {
         TreasureEntity treasure = treasures.get(block);
 
         var future = CompletableFuture.supplyAsync(() -> treasureRepository.hasClaimed(treasure.getId(), player.getUniqueId()))
@@ -110,7 +114,7 @@ public class TreasureManager {
         return future;
     }
 
-    public static CompletableFuture<Void> createTreasure(Player player, TreasureEntity treasure) {
+    public CompletableFuture<Void> createTreasure(Player player, TreasureEntity treasure) {
 
         player.sendMessage("§eCreating treasure for this block, please wait...");
         return CompletableFuture.supplyAsync(() -> treasureRepository.getTreasureByPosition(treasure.getWorld(), treasure.getX(), treasure.getY(), treasure.getZ()) != null)
@@ -120,7 +124,7 @@ public class TreasureManager {
                         return CompletableFuture.completedFuture(null);
                     }
 
-                    CreateCommand.creatingTreasures.remove(player);
+                    creatingTreasures.remove(player);
                     return CompletableFuture.supplyAsync(() -> treasureRepository.createTreasure(
                             treasure.getId(),
                             treasure.getWorld(),
@@ -154,4 +158,23 @@ public class TreasureManager {
                 });
     }
 
+    public Map<String, CompletableFuture<?>> getTasksInProgress() {
+        return tasksInProgress;
+    }
+
+    public Map<Player, TreasureEntity> getCreatingTreasures() {
+        return creatingTreasures;
+    }
+
+    public Map<Block, TreasureEntity> getTreasures() {
+        return treasures;
+    }
+
+    public DatabaseManager getDatabaseManager() {
+        return databaseManager;
+    }
+
+    public TreasureRepository getTreasureRepository() {
+        return treasureRepository;
+    }
 }

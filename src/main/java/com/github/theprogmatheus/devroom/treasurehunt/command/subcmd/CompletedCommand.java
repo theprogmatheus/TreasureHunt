@@ -4,6 +4,7 @@ import com.github.theprogmatheus.devroom.treasurehunt.TreasureHunt;
 import com.github.theprogmatheus.devroom.treasurehunt.TreasureManager;
 import com.github.theprogmatheus.devroom.treasurehunt.command.AbstractCommand;
 import com.github.theprogmatheus.devroom.treasurehunt.database.entity.TreasureEntity;
+import com.github.theprogmatheus.devroom.treasurehunt.database.repository.TreasureRepository;
 import com.github.theprogmatheus.devroom.treasurehunt.gui.menus.TreasureClaimsMenu;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
@@ -18,9 +19,14 @@ import java.util.stream.Collectors;
 
 public class CompletedCommand extends AbstractCommand {
 
+    private final TreasureManager manager;
+    private final TreasureRepository repository;
+
 
     public CompletedCommand() {
         super("completed", "Returns the list of players who found that treasure", "completed <treasureId>");
+        this.manager = TreasureHunt.getInstance().getTreasureManager();
+        this.repository = this.manager.getTreasureRepository();
     }
 
     @Override
@@ -32,13 +38,13 @@ public class CompletedCommand extends AbstractCommand {
         if (args.length >= 1) {
             String treasureId = args[0];
 
-            CompletableFuture<Void> task = CompletableFuture.supplyAsync(() -> TreasureManager.treasureRepository.existsTreasure(treasureId))
+            CompletableFuture<Void> task = CompletableFuture.supplyAsync(() -> repository.existsTreasure(treasureId))
                     .thenCompose(existsTreasure -> {
                         if (!existsTreasure) {
                             sender.sendMessage("§cThere is no treasure registered with the given ID: %s".formatted(treasureId));
                             return CompletableFuture.completedFuture(null);
                         }
-                        return CompletableFuture.supplyAsync(() -> TreasureManager.treasureRepository.getClaims(treasureId));
+                        return CompletableFuture.supplyAsync(() -> repository.getClaims(treasureId));
                     }).thenAccept(claims -> {
                         if (claims == null)
                             return;
@@ -51,7 +57,7 @@ public class CompletedCommand extends AbstractCommand {
                         ex.printStackTrace();
                         return null;
                     });
-            TreasureManager.runTask(player, () -> task);
+            manager.runTask(player, () -> task);
         } else
             sender.sendMessage("§cUsage: %s".formatted(this.usage));
 
@@ -62,7 +68,7 @@ public class CompletedCommand extends AbstractCommand {
     @Override
     public List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
         if (args.length == 1) {
-            return TreasureManager.treasures.values()
+            return manager.getTreasures().values()
                     .stream()
                     .map(TreasureEntity::getId)
                     .filter(id -> id.startsWith(args[0]))
